@@ -1,6 +1,7 @@
 package tel.ran.photo.hub.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,6 +11,7 @@ import tel.ran.photo.hub.model.Person;
 import tel.ran.photo.hub.repository.PersonRepository;
 import tel.ran.photo.hub.security.PersonDetails;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,5 +36,16 @@ public class PersonDetailsService implements UserDetailsService {
 
     public void addAdmin(long id) {
         jdbcTemplate.update("update person set role='ROLE_ADMIN' where id=? ", id);
+    }
+    public List<Person> getAllNotAdmin(){
+        return jdbcTemplate.query(
+                "select * from person where role='ROLE_USER'", new BeanPropertyRowMapper<>(Person.class)
+        );
+    }
+    public Optional<Person> getByEmail(String email){
+        return personRepository.findByEmail(email);
+    }
+    public Optional<Person> getByUsername(String username){
+        return personRepository.findByUsername(username);
     }
 }
