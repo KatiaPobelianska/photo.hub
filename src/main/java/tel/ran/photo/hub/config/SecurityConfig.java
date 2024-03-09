@@ -35,24 +35,21 @@ public class SecurityConfig {
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/templates/auth/login", "/templates/auth/registration", "/error", "/img/**").permitAll()
+                                .requestMatchers("/auth/login", "/auth/registration", "/error", "/img/**").permitAll()
                                 .anyRequest().hasAnyRole("USER", "ADMIN")
                 )
                 .formLogin(formLogin ->
                         formLogin
-                                .loginPage("/templates/auth/login")
+                                .loginPage("/auth/login")
                                 .loginProcessingUrl("/process_login")
-                                .defaultSuccessUrl("", true)
-                                .failureUrl("/templates/auth/login?error")
+                                .defaultSuccessUrl("/main", true)
+                                .failureUrl("/auth/login?error")
                 )
                 .logout(logout ->
                         logout
-                                .logoutUrl("/templates/auth/logout")
-                                .logoutSuccessUrl("/templates/auth/login")
+                                .logoutUrl("/auth/logout")
+                                .logoutSuccessUrl("/auth/login")
                 );
         return http.build();
     }
-
-
-
 }
