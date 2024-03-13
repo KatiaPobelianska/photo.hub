@@ -69,7 +69,7 @@ public class PostService {
 
     public List<Post> findAllPostsByOwner(String username){
         return jdbcTemplate.query(
-                "select * from post where owner_username=?", new Object[]{username}, new BeanPropertyRowMapper<>(Post.class)
+                "select * from post where owner_username=? order by created_at desc", new Object[]{username}, new BeanPropertyRowMapper<>(Post.class)
         );
     }
 
