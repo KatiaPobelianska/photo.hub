@@ -5,6 +5,11 @@
     <title>Profile</title>
 </head>
 <body>
+<div th:each="post:${posts}" >
+    <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
+    <a th:href="@{/posts/{id}(id=${post.getId()})}" th:text="${post.getTitle()}"></a>
+
+</div>
 
 </body>
 </html>

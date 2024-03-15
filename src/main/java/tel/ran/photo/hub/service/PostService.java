@@ -29,11 +29,11 @@ public class PostService {
         return postRepository.findById(id).stream().findAny().orElse(null);
     }
 
-    public void save(Post post) {
+    public void save(Post post, String username) {
 //        postRepository.save(post);
 
         jdbcTemplate.update("insert into post(owner_username, title, description, photo) values(?,?,?,?)",
-                post.getOwner().getUsername(), post.getTitle(), post.getDescription(), post.getPhoto());
+                username, post.getTitle(), post.getDescription(), post.getPhoto());
     }
 
     public void delete(long id) {

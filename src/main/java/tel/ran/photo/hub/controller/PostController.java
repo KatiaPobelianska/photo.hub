@@ -1,12 +1,18 @@
 package tel.ran.photo.hub.controller;
 
 import jakarta.validation.Valid;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tel.ran.photo.hub.model.Comment;
 import tel.ran.photo.hub.model.Post;
 import tel.ran.photo.hub.security.PersonDetails;
@@ -36,11 +42,19 @@ public class PostController {
 
     @GetMapping("/{id}")
     public String getById(@PathVariable("id") long id, Model model, @ModelAttribute("comment")Comment comment) {
-        model.addAttribute("id", postService.getById(id));
+        model.addAttribute("post", postService.getById(id));
         model.addAttribute("comments", commentService.getAllByPostId(id));
         model.addAttribute("count", photoLikeService.getLikesCountByPostId(id));
         return "post/post";
     }
+    @GetMapping("/photo/{postId}")
+    public ResponseEntity<byte[]> getPhoto(@PathVariable("postId") long postId){
+        byte[] photo = postService.getById(postId).getPhoto();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        return new ResponseEntity<>(photo, headers, HttpStatus.OK);
+    }
+
 
     @GetMapping("/new")
     public String addNewPostPage(@ModelAttribute("post") Post post) {
@@ -48,12 +62,20 @@ public class PostController {
     }
 
     @PostMapping()
-    public String save(@ModelAttribute("post") @Valid Post post, BindingResult bindingResult) {
+    @SneakyThrows
+    public String save(@ModelAttribute("post") @Valid Post post, BindingResult bindingResult,
+                       @RequestParam("photoFile")MultipartFile photoFile, @AuthenticationPrincipal PersonDetails personDetails) {
+        if(photoFile.isEmpty()){
+            bindingResult.rejectValue("photo", "error.photo", "please select photo file");
+        }
+        else {
+            post.setPhoto(photoFile.getBytes());
+        }
         if (bindingResult.hasErrors()) {
             return "post/new";
         }
-        postService.save(post);
-        return "redirect:/";
+        postService.save(post, personDetails.getUsername());
+        return "redirect:/profile";
     }
 
     @GetMapping("/edit/{id}")
@@ -74,7 +96,7 @@ public class PostController {
     @DeleteMapping("/{id}")
     public String delete(@PathVariable("id") long id){
         postService.delete(id);
-        return "redirect:/";
+        return "redirect:/profile";
     }
     @GetMapping("/views")
     public String getAllSortedByViews(Model model){
@@ -97,7 +119,5 @@ public class PostController {
         model.addAttribute("posts", postService.getAllPersonLikes(personDetails.getUsername()));
         return "post/likes";
     }
-
-
 
 }
