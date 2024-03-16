@@ -5,8 +5,36 @@
     <title>Post</title>
 </head>
 <body>
-<form>
-
+<form th:action="@{/posts}">
+    <input type="submit" value="back to all posts"/>
 </form>
+<h2 th:text="${post.getTitle()}"></h2>
+<img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
+<br>
+<p th:text="${'count of likes: ' + count}"></p>
+<br>
+<p th:text="${'views: ' + post.getViews()}"></p>
+<br>
+<p th:text="${post.getDescription()}"></p>
+<br>
+<p th:text="${post.getCreatedAt()}"></p>
+
+<form th:action="@{/posts/public/profile/{username}(username=${post.getOwner().getUsername()})}">
+    <input type="submit" th:value="${post.getOwner().getUsername()}"/>
+</form>
+<br>
+<h3>Comments</h3>
+<form th:action="@{/comments/{postId}(postId=${post.getId()})}" th:object="${comment}" th:method="POST">
+    <label for="description">Your comment:</label>
+    <input type="text" th:field="*{description}" id="description"/>
+    <div style="color:red" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+    <input type="submit" value="send"/>
+</form>
+<div th:each="comment:${post.getComments()}">
+    <p th:text="${comment.getDescription()}"></p>
+    <p th:text="${comment.getPerson().getUsername()}"></p>
+    <p th:text="${comment.getCreatedAt()}"></p>
+    <hr>
+</div>
 </body>
 </html>

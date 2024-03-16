@@ -42,7 +42,7 @@ public class SecurityConfig {
                         formLogin
                                 .loginPage("/auth/login")
                                 .loginProcessingUrl("/process_login")
-                                .defaultSuccessUrl("/main", true)
+                                .defaultSuccessUrl("/posts", true)
                                 .failureUrl("/auth/login?error")
                 )
                 .logout(logout ->

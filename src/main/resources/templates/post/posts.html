@@ -5,10 +5,6 @@
     <title>Posts</title>
 </head>
 <body>
-<form th:action="@{/posts}">
-    <input type="submit" value="back to all posts"/>
-</form>
-
 <div th:each="post:${posts}">
     <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
     <br>

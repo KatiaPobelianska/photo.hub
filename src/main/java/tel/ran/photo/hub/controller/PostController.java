@@ -17,6 +17,7 @@ import tel.ran.photo.hub.model.Comment;
 import tel.ran.photo.hub.model.Post;
 import tel.ran.photo.hub.security.PersonDetails;
 import tel.ran.photo.hub.service.CommentService;
+import tel.ran.photo.hub.service.PersonDetailsService;
 import tel.ran.photo.hub.service.PhotoLikeService;
 import tel.ran.photo.hub.service.PostService;
 
@@ -26,12 +27,14 @@ public class PostController {
     private final CommentService commentService;
     private final PhotoLikeService photoLikeService;
     private final PostService postService;
+    private final PersonDetailsService personDetailsService;
 
     @Autowired
-    public PostController(CommentService commentService, PhotoLikeService photoLikeService, PostService postService) {
+    public PostController(CommentService commentService, PhotoLikeService photoLikeService, PostService postService, PersonDetailsService personDetailsService) {
         this.commentService = commentService;
         this.photoLikeService = photoLikeService;
         this.postService = postService;
+        this.personDetailsService = personDetailsService;
     }
 
     @GetMapping()
@@ -43,13 +46,14 @@ public class PostController {
     @GetMapping("/{id}")
     public String getById(@PathVariable("id") long id, Model model, @ModelAttribute("comment")Comment comment) {
         model.addAttribute("post", postService.getById(id));
-        model.addAttribute("comments", commentService.getAllByPostId(id));
+//        model.addAttribute("comments", commentService.getAllByPostId(id));
         model.addAttribute("count", photoLikeService.getLikesCountByPostId(id));
         return "post/post";
     }
     @GetMapping("/photo/{postId}")
     public ResponseEntity<byte[]> getPhoto(@PathVariable("postId") long postId){
-        byte[] photo = postService.getById(postId).getPhoto();
+        Post post = postService.getById(postId);
+        byte[] photo = post.getPhoto();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
         return new ResponseEntity<>(photo, headers, HttpStatus.OK);
@@ -103,7 +107,7 @@ public class PostController {
         model.addAttribute("posts", postService.sortedByViews());
         return "post/posts";
     }
-    @GetMapping("/{key}")
+    @GetMapping("/search/{key}")
     public String getAllPostsByKey(@PathVariable("key") String key, Model model){
         model.addAttribute("key", postService.findAllByKey(key));
         return "post/posts";
@@ -118,6 +122,12 @@ public class PostController {
     public String getAllUserLikes(@AuthenticationPrincipal PersonDetails personDetails, Model model){
         model.addAttribute("posts", postService.getAllPersonLikes(personDetails.getUsername()));
         return "post/likes";
+    }
+    @GetMapping("/public/profile/{username}")
+    public String getPublicProfile(@PathVariable("username") String username, Model model){
+        model.addAttribute("person", personDetailsService.getByUsername(username));
+        model.addAttribute("posts", postService.findAllPostsByOwner(username));
+        return "post/publicProfile";
     }
 
 }
