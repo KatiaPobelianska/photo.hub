@@ -5,11 +5,22 @@
     <title>Profile</title>
 </head>
 <body>
-<div th:each="post:${posts}" >
-    <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
-    <a th:href="@{/posts/{id}(id=${post.getId()})}" th:text="${post.getTitle()}"></a>
-
+<form th:action="@{/posts}">
+    <input type="submit" value="Back to all posts"/>
+</form>
+<form th:action="@{/posts/profile/likes}">
+    <input type="submit" value="Liked posts"/>
+</form>
+<div th:if="${isPublisher}">
+    <form th:action="@{/posts/new}">
+        <input type="submit" value="New post"/>
+    </form>
 </div>
+<div th:each="post:${posts}" th:if="${isPublisher}">
+    <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
+    <a th:href="@{/posts/private/{id}(id=${post.getId()})}" th:text="${post.getTitle()}"></a>
+</div>
+
 
 </body>
 </html>

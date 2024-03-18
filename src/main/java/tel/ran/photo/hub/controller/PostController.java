@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import tel.ran.photo.hub.model.AccountType;
 import tel.ran.photo.hub.model.Comment;
 import tel.ran.photo.hub.model.Post;
 import tel.ran.photo.hub.security.PersonDetails;
@@ -44,14 +45,15 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public String getById(@PathVariable("id") long id, Model model, @ModelAttribute("comment")Comment comment) {
+    public String getById(@PathVariable("id") long id, Model model, @ModelAttribute("comment") Comment comment) {
         model.addAttribute("post", postService.getById(id));
 //        model.addAttribute("comments", commentService.getAllByPostId(id));
         model.addAttribute("count", photoLikeService.getLikesCountByPostId(id));
         return "post/post";
     }
+
     @GetMapping("/photo/{postId}")
-    public ResponseEntity<byte[]> getPhoto(@PathVariable("postId") long postId){
+    public ResponseEntity<byte[]> getPhoto(@PathVariable("postId") long postId) {
         Post post = postService.getById(postId);
         byte[] photo = post.getPhoto();
         HttpHeaders headers = new HttpHeaders();
@@ -68,18 +70,17 @@ public class PostController {
     @PostMapping()
     @SneakyThrows
     public String save(@ModelAttribute("post") @Valid Post post, BindingResult bindingResult,
-                       @RequestParam("photoFile")MultipartFile photoFile, @AuthenticationPrincipal PersonDetails personDetails) {
-        if(photoFile.isEmpty()){
+                       @RequestParam("photoFile") MultipartFile photoFile, @AuthenticationPrincipal PersonDetails personDetails) {
+        if (photoFile.isEmpty()) {
             bindingResult.rejectValue("photo", "error.photo", "please select photo file");
-        }
-        else {
+        } else {
             post.setPhoto(photoFile.getBytes());
         }
         if (bindingResult.hasErrors()) {
             return "post/new";
         }
         postService.save(post, personDetails.getUsername());
-        return "redirect:/profile";
+        return "redirect:/posts/profile";
     }
 
     @GetMapping("/edit/{id}")
@@ -97,37 +98,60 @@ public class PostController {
         postService.update(id, post);
         return "redirect:/posts/" + id;
     }
+
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") long id){
+    public String delete(@PathVariable("id") long id) {
         postService.delete(id);
-        return "redirect:/profile";
+        return "redirect:/posts/profile";
     }
+
     @GetMapping("/views")
-    public String getAllSortedByViews(Model model){
+    public String getAllSortedByViews(Model model) {
         model.addAttribute("posts", postService.sortedByViews());
         return "post/posts";
     }
+
     @GetMapping("/search/{key}")
-    public String getAllPostsByKey(@PathVariable("key") String key, Model model){
+    public String getAllPostsByKey(@PathVariable("key") String key, Model model) {
         model.addAttribute("key", postService.findAllByKey(key));
         return "post/posts";
     }
+
     @GetMapping("/profile")
-    public String getProfile(@AuthenticationPrincipal PersonDetails personDetails, Model model){
+    public String getProfile(@AuthenticationPrincipal PersonDetails personDetails, Model model) {
         model.addAttribute("person", personDetails.getPerson());
         model.addAttribute("posts", postService.findAllPostsByOwner(personDetails.getUsername()));
+        if (personDetails.getPerson().getAccountType() == AccountType.PUBLISHER){
+            model.addAttribute("isPublisher", true);
+        }
         return "post/profile";
     }
+
+    @GetMapping("/private/{id}")
+    public String getPrivateById(@PathVariable("id") long id, Model model,
+                                 @AuthenticationPrincipal PersonDetails personDetails) {
+        Post post = postService.getById(id);
+        if (!post.getOwner().getUsername().equals(personDetails.getUsername())) {
+            return "redirect:/posts/" + id;
+        }
+        model.addAttribute("post", post);
+        model.addAttribute("person", personDetails.getPerson());
+
+        return "post/private";
+    }
+
     @GetMapping("/profile/likes")
-    public String getAllUserLikes(@AuthenticationPrincipal PersonDetails personDetails, Model model){
+    public String getAllUserLikes(@AuthenticationPrincipal PersonDetails personDetails, Model model) {
         model.addAttribute("posts", postService.getAllPersonLikes(personDetails.getUsername()));
         return "post/likes";
     }
+
     @GetMapping("/public/profile/{username}")
-    public String getPublicProfile(@PathVariable("username") String username, Model model){
-        model.addAttribute("person", personDetailsService.getByUsername(username));
+    public String getPublicProfile(@PathVariable("username") String username, Model model) {
+        model.addAttribute("person", personDetailsService.getByUsername(username).get());
         model.addAttribute("posts", postService.findAllPostsByOwner(username));
         return "post/publicProfile";
     }
+
 
 }

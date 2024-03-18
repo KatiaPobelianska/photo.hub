@@ -5,6 +5,9 @@
     <title>Posts</title>
 </head>
 <body>
+<form th:action="@{/posts/profile}">
+    <input type="submit" value="Profile"/>
+</form>
 <div th:each="post:${posts}">
     <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
     <br>

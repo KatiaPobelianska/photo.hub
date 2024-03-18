@@ -5,6 +5,17 @@
     <title>Public profile</title>
 </head>
 <body>
+<form th:action="@{/posts}">
+    <input type="submit" value="Back to all posts"/>
+</form>
 
+<h2 th:text="${person.getUsername()}"></h2>
+<h2 th:text="${person.getEmail()}"></h2>
+<div th:each="post:${posts}">
+    <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
+    <br>
+    <a th:text="${post.getTitle()}" th:href="@{/posts/{id}(id=${post.getId()})}"></a>
+
+</div>
 </body>
 </html>

@@ -31,21 +31,18 @@ public class PhotoLikeService {
         );
     }
 
-    public void save(Post post, Person person) {
+    public void save(long postId, String username) {
         Optional<PhotoLike> photoLikeOptional = jdbcTemplate.query(
-                "select * from photo_like where post_id=? and person_username=?", new Object[]{post.getId(), person.getUsername()},
+                "select * from photo_like where post_id=? and person_username=?", new Object[]{postId, username},
                 new BeanPropertyRowMapper<>(PhotoLike.class)
         ).stream().findAny();
         if (photoLikeOptional.isPresent()) {
             throw new LikeAlreadyPresentException("this person has already liked this post");
         }
-        PhotoLike photoLike = new PhotoLike();
-        photoLike.setPost(post);
-        photoLike.setPerson(person);
-        photoLikeRepository.save(photoLike);
+       jdbcTemplate.update("insert into photo_like(post_id, person_username) values(?,?)", postId, username);
     }
 
-    public void delete(long id) {
-        photoLikeRepository.deleteById(id);
+    public void deleteByPostId(long postId) {
+        jdbcTemplate.update("delete from photo_like where post_id=?", postId);
     }
 }

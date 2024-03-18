@@ -5,6 +5,18 @@
     <title>Likes</title>
 </head>
 <body>
+<form th:actin="@{/posts}">
+    <input type="submit" value="Back to all posts"/>
+</form>
+<form th:action="@{/posts/profile}">
+    <input type="submit" value="Back to profile"/>
+</form>
+<h2>Liked posts</h2>
+<div th:each="post:${posts}">
+    <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
+    <a th:href="@{/posts/{id}(id=${post.getId()})}" th:text="Title"></a>
 
+
+</div>
 </body>
 </html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Private profile</title>
+</head>
+<body>
+<form th:action="@{/posts/profile}">
+    <input type="submit" value="Back to profile"/>
+</form>
+<img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
+<h2 th:text="${post.getTitle()}"></h2>
+<p th:text="${post.getDescription()}"></p>
+
+<form th:action="@{/posts/edit/{id}(id=${post.getId()})}">
+    <input type="submit" value="Edit"/>
+</form>
+
+<form th:method="DELETE" th:action="@{/posts/{id}(id=${post.getId()})}">
+    <input type="submit" value="Delete"/>
+</form>
+
+</body>
+</html>

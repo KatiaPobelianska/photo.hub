@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import tel.ran.photo.hub.exception.LikeAlreadyPresentException;
 import tel.ran.photo.hub.model.Post;
 import tel.ran.photo.hub.security.PersonDetails;
 import tel.ran.photo.hub.service.PhotoLikeService;
@@ -17,15 +18,20 @@ public class PhotoLikeController {
     public PhotoLikeController(PhotoLikeService photoLikeService) {
         this.photoLikeService = photoLikeService;
     }
-    @PostMapping()
-    public String save(@ModelAttribute("post") Post post, @AuthenticationPrincipal PersonDetails personDetails){
-       photoLikeService.save(post, personDetails.getPerson());
-       return "redirect:/posts/" + post.getId();
+    @PostMapping("/{postId}")
+    public String save(@PathVariable("postId") long postId, @AuthenticationPrincipal PersonDetails personDetails){
+
+      try {
+          photoLikeService.save(postId, personDetails.getUsername());
+      }catch (LikeAlreadyPresentException e){
+          photoLikeService.deleteByPostId(postId);
+      }
+       return "redirect:/posts/" + postId;
     }
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") long id){
-        photoLikeService.delete(id);
-        return "redirect:/posts";
-    }
+//    @DeleteMapping("/{id}")
+//    public String delete(@PathVariable("id") long id){
+//        photoLikeService.delete(id);
+//        return "redirect:/posts";
+//    }
 
 }
