@@ -8,6 +8,11 @@
 <form th:action="@{/posts/profile}">
     <input type="submit" value="Profile"/>
 </form>
+<form th:action="@{/posts/search}">
+    <input type="text" name="key"/>
+    <input type="submit" value="Search"/>
+</form>
+<p th:if="${posts.isEmpty()}">Nothing found</p>
 <div th:each="post:${posts}">
     <img th:src="@{/posts/photo/{postId}(postId=${post.getId()})}">
     <br>

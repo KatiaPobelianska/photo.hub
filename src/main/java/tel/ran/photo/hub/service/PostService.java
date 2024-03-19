@@ -25,7 +25,7 @@ public class PostService {
     }
 
     public Post getById(long id) {
-        addViewById(id);
+
         return postRepository.findById(id).stream().findAny().orElse(null);
     }
 
@@ -47,9 +47,9 @@ public class PostService {
         postRepository.save(postToBeSaved);
     }
 
-    private void addViewById(long id) {
+    public void addViewById(long id) {
         Post post = postRepository.findById(id).stream().findAny().orElse(null);
-        post.setViews(post.getViews() + 1);
+        post.setViews(post.getViews()+1);
         postRepository.save(post);
     }
 

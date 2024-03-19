@@ -43,10 +43,16 @@ public class PostController {
         model.addAttribute("posts", postService.getAll());
         return "post/posts";
     }
+    @GetMapping("/search")
+    public String getAllPostsByKey(@RequestParam("key") String key, Model model) {
+        model.addAttribute("posts", postService.findAllByKey(key));
+        return "post/posts";
+    }
 
     @GetMapping("/{id}")
     public String getById(@PathVariable("id") long id, Model model, @ModelAttribute("comment") Comment comment) {
         model.addAttribute("post", postService.getById(id));
+        postService.addViewById(id);
 //        model.addAttribute("comments", commentService.getAllByPostId(id));
         model.addAttribute("count", photoLikeService.getLikesCountByPostId(id));
         return "post/post";
@@ -111,11 +117,7 @@ public class PostController {
         return "post/posts";
     }
 
-    @GetMapping("/search/{key}")
-    public String getAllPostsByKey(@PathVariable("key") String key, Model model) {
-        model.addAttribute("key", postService.findAllByKey(key));
-        return "post/posts";
-    }
+
 
     @GetMapping("/profile")
     public String getProfile(@AuthenticationPrincipal PersonDetails personDetails, Model model) {
